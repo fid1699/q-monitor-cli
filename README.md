@@ -4,6 +4,8 @@ A cli for basic Quilibrium multi node monitoring.
 
 Don't expect anything fancy. This is not a replacement for proper uptime monitoring (e.g. https://hetrixtools.com/), but at my desk I like to have one terminal monitor up showing application specific stats too, like last frame and peer count.
 
+<img width="1575" alt="q-monitor" src="https://github.com/fid1699/q-monitor-cli/assets/159585544/9ad6108c-e7d9-417d-830f-163a6150251e">
+
 ## Configuration
 
 This implementation uses SSH so it relies on a `.config.json` file with the following format:
