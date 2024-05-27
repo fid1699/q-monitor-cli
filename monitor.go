@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/rivo/tview"
@@ -110,26 +111,31 @@ func main() {
 		grid.AddItem(textView, i/2, i%2, 1, 1, 0, 0, false)
 	}
 
+	var wg sync.WaitGroup
 	go func() {
 		for {
 			for i, node := range config.Nodes {
-				// this implementation uses the service log reader, but you
-				// can also use the tmux log reader (or add your own e.g. docker)
-				logReader := ServiceLogReader{ServiceName: "ceremonyclient"}
-				output, err := getNodeStatus(node, logReader)
-				if err != nil {
-					textViews[i].SetText(fmt.Sprintf("Error fetching status for node %s: %v", node.IP, err))
-					app.QueueUpdateDraw(func() {
+				wg.Add(1)
+				go func(i int, node Node) {
+					defer wg.Done()
+					// this implementation uses the service log reader, but you
+					// can also use the tmux log reader (or add your own e.g. docker)
+					logReader := ServiceLogReader{ServiceName: "ceremonyclient"}
+					output, err := getNodeStatus(node, logReader)
+					if err != nil {
 						textViews[i].SetText(fmt.Sprintf("Error fetching status for node %s: %v", node.IP, err))
-					})
-				} else {
-					textViews[i].SetText(output)
-					app.QueueUpdateDraw(func() {
+						app.QueueUpdateDraw(func() {
+							textViews[i].SetText(fmt.Sprintf("Error fetching status for node %s: %v", node.IP, err))
+						})
+					} else {
 						textViews[i].SetText(output)
-					})
-
-				}
+						app.QueueUpdateDraw(func() {
+							textViews[i].SetText(output)
+						})
+					}
+				}(i, node)
 			}
+			wg.Wait()
 			time.Sleep(pollingInterval)
 		}
 	}()
