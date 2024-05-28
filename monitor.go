@@ -276,8 +276,8 @@ func extractLogMessages(logs string) string {
 
 func parseCPUUsage(cpuStat string) string {
 	parts := strings.Fields(cpuStat)
-	usage := fmt.Sprintf("User Space: %s%%; System Space: %s%%",
-		parts[1], parts[3])
+	usage := fmt.Sprintf("User Space: %s%%; System Space: %s%%; Steal: %s%%",
+		parts[1], parts[3], parts[15])
 	return usage
 }
 
